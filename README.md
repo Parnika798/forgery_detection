@@ -1,6 +1,6 @@
 # Receipt Forgery Detection System
 
-A multi-signal AI pipeline that detects tampered receipts by combining a CNN image classifier, a pixel-level segmentation model, rule-based physical artifact detection, and a semantic OCR reasoning engine — all served through a FastAPI backend.
+A multi-signal AI pipeline that detects tampered receipts by combining a CNN image classifier, a pixel-level segmentation model, rule-based physical artifact detection, and a OCR-driven semantic validation layer — all served through a FastAPI backend.
 
 ---
 
@@ -78,73 +78,39 @@ This system addresses these challenges by combining visual signals with semantic
          │  + Structured field parse (items, tax)│
          └──────────────────────────────────────┘
 ```
-
----
-
 ## Dataset
 
-### Source
+### Source  
 **SROIE 2019** — a publicly available scanned receipt dataset from Kaggle (`urbikn/sroie-datasetv2`).
 
-```
-973 images
-  ├── train/img/      ← receipt scans (.jpg)
-  ├── train/box/      ← OCR bounding boxes (8 coords + text per line)
-  ├── train/entities/ ← structured fields: TOTAL, DATE, COMPANY
-  └── test/  (same structure)
-```
-
-Every image has a corresponding `.txt` file with word-level OCR bounding boxes in the format `x1,y1,x2,y1,x2,y2,x1,y2,text`. This is the key input to the forgery generator.
-
-### Forgery Generation
-
-Since no large-scale ground-truth forged receipt dataset exists, forgeries were generated programmatically. The forgery engine reads the OCR box coordinates and patches specific fields directly into the image.
-
-**Implemented forgery types:**
-
-| Type | Target | Method |
-|---|---|---|
-| `price_replace` | Line-item amounts | Inflate 5×–50×, or modify 1–2 digits (`partial_replace`) |
-| `total_replace` | Grand total field | Find box after TOTAL keyword, inflate |
-| `date_replace` | Date fields | Swap year with a different year |
-| `smudge` | Any financial field | Motion blur + noise — makes value unreadable |
-| `copy_move` | Any financial field | Paste patch from elsewhere in the same image |
-
-**Realism improvements in the forgery generator:**
-- Local background patch sampling instead of flat-colour fill (prevents visible rectangle)
-- Randomised ink colour (slightly off-black, simulates faded/uneven printer ink)
-- ±3px position jitter when rendering replacement text
-- Gaussian noise injection matching surrounding texture
-- JPEG re-compression artifact simulation on the whole image (60–88% quality)
-- Soft mask edges via Gaussian blur (simulates annotation imprecision)
-- Brightness/contrast variation (simulates uneven scan lighting)
-
-**Final dataset composition (confirmed from notebook output):**
-
-```
-Total images : 1,903
-  Real       : 973   (label = 0)
-  Forged     : 930   (label = 1)   ← 43 skipped (no matching OCR boxes)
-  With masks : 930   ← binary pixel-level tamper mask per forged image
-
-Class balance : 1.05:1 (real:forged)
-Dataset size  : ~1,040 MB on Google Drive
-
-Forgery type breakdown (from actual run):
-  total_replace   : 330  (35.5%)
-  price_replace   : 310  (33.3%)
-  date_replace    : 290  (31.2%)
-```
-
-**Splits (stratified by label):**
-
-```
-Train : 1,426 images  (697 forged / 729 real)
-Val   :   286 images
-Test  :   191 images
-```
+- 973 receipt images with OCR bounding boxes and structured entity annotations (e.g., TOTAL, DATE, COMPANY)  
+- Each image has a corresponding `.txt` file with word-level OCR boxes in the format:  
+  `x1,y1,x2,y1,x2,y2,x1,y2,text`  
+- These OCR boxes are used as the basis for forgery generation  
 
 ---
+
+### Forgery Generation  
+
+Since no large-scale ground-truth forged dataset exists, forgeries are generated programmatically by modifying OCR-aligned regions.
+
+**Forgery types:**
+- `price_replace` — inflate or partially modify line-item amounts  
+- `total_replace` — modify the grand total field  
+- `date_replace` — alter date values  
+- `smudge` — apply blur/noise to obscure values  
+- `copy_move` — copy-paste regions within the same image  
+
+**Realism techniques:**
+- Background-aware patching (avoids visible rectangles)  
+- Slight ink variation and positional jitter  
+- Noise, blur, and brightness/contrast adjustments  
+- JPEG recompression to simulate scan artifacts  
+
+---
+
+### Final Dataset  
+
 
 ## Training
 
