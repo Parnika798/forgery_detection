@@ -12,6 +12,11 @@ A multi-signal AI system for detecting tampered receipts using **image classific
 - Handles cases where **image looks clean but numbers are inconsistent**
 
 ---
+<img width="1361" height="852" alt="image" src="https://github.com/user-attachments/assets/dadf7220-7d76-4f91-af6c-31bad197355b" />
+<img width="1261" height="903" alt="image" src="https://github.com/user-attachments/assets/c4c88bd0-856f-4095-8972-b7c42673350c" />
+<img width="1266" height="915" alt="image" src="https://github.com/user-attachments/assets/d82c88c9-9f15-4164-a2f4-d1a947b91d03" />
+
+
 
 ##  Results
 
