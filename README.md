@@ -15,8 +15,7 @@ Receipt fraud is a real and growing problem in expense reimbursement, insurance 
 
 Standard image classifiers fail on this problem because **the forgery region is tiny** (often <5% of pixels), the rest of the receipt is authentic, and high-quality edits leave no visible compression artifacts. A system that only asks "does this look forged?" will miss cases where the numbers are wrong but the image looks clean.
 
-This system solves the problem by combining visual signals with **semantic reasoning** — it checks whether the numbers on the receipt actually add up.
-
+This system addresses these challenges by combining visual signals with semantic validation. Instead of relying only on appearance, it uses OCR to extract and approximate the financial structure of the receipt, and then verifies whether values such as line items, taxes, and totals are logically consistent.
 ---
 
 ## System Architecture
