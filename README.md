@@ -380,7 +380,7 @@ The optimal threshold (0.43 in this run) is found by sweeping `[0.25, 0.75]` on 
 
 ## Results
 
-All numbers below come directly from notebook cell outputs — no estimates.
+
 
 ### Dataset Statistics
 
@@ -473,87 +473,6 @@ The classifier alone barely beats random (AUC 0.67, accuracy 53%). The ensemble 
 
 ---
 
-## API Reference
-
-### `POST /scan`
-
-Accepts a receipt image, runs all five analysis modules, returns a full verdict.
-
-**Request:** `multipart/form-data` with field `file` (JPG/PNG/WEBP)
-
-**Response:**
-```json
-{
-  "verdict":     "forged",
-  "is_forged":   true,
-  "confidence":  87.3,
-
-  "clf_prob":    67.1,
-  "seg_score":   0.0,
-  "tamper_area": 0.0,
-  "anom_score":  34.2,
-  "phys_score":  85.0,
-  "text_score":  55.0,
-  "cross_score": 45.0,
-  "n_signals":   3,
-
-  "flags": [
-    "TOTAL MISMATCH — all 2 check(s) failed: sum_items(2000.00)≠total(5800.00)",
-    "Sticker/label detected over lower receipt area",
-    "Rectangular border lines (42H/268V) — patch edges",
-    "Brightness discontinuity (78 levels)"
-  ],
-
-  "ocr": {
-    "n_amounts":  5,
-    "n_dates":    1,
-    "total":      5800.0,
-    "avg_conf":   74.2,
-    "raw_text":   "DEF Electronics\nHeadphones  1,200.00\n...",
-    "amounts":    [350.0, 450.0, 1200.0, 5000.0, 5800.0],
-    "dates":      ["12/03/2024"],
-    "ocr_error":  null
-  },
-
-  "structured": {
-    "items":          [1200.0, 450.0, 350.0],
-    "taxes":          [],
-    "discounts":      [],
-    "payments":       [5000.0],
-    "subtotal":       null,
-    "total":          5800.0,
-    "inferred_total": false
-  },
-
-  "overlay_b64": "<base64-encoded JPEG tamper heatmap>"
-}
-```
-
-The `structured` field exposes the semantic parse — which amounts were classified as items, payments, taxes, etc. The `flags` list is human-readable and tells reviewers exactly what the system found.
-
----
-
-### `POST /scan-debug`
-
-**Diagnostic endpoint — no ML models required.** Runs OCR and logical validation only. Use this whenever a verdict looks wrong.
-
-```bash
-curl -X POST http://localhost:8000/scan-debug \
-     -F "file=@receipt.jpg" | python -m json.tool
-```
-
-Returns the full line-by-line classification of every OCR line (`raw_fields`), the score from each individual validator, and a `diagnosis` string explaining why OCR succeeded or failed. This was added specifically to debug cases where `ocr_error` was silently returning `{}` and all scores were 0.
-
----
-
-### `GET /health`
-
-```json
-{ "status": "ok", "models_loaded": true }
-```
-
----
-
 ## Model Artifacts
 
 Four files required for inference:
@@ -567,33 +486,5 @@ Four files required for inference:
 
 ---
 
-## Versioning
 
-| Version | What changed |
-|---|---|
-| **v1 (training)** | Baseline: EfficientNet-B3 (224px, single LR) + MobileNetV2 U-Net (15ep) + 7-feature anomaly detector |
-| **v2 (training)** | 320px input, differential LR (enc=2e-5, head=2e-4), OneCycleLR, forged weight 2.61×, label smoothing, EfficientNet-B3 U-Net (40ep), Focal+Dice+BCE loss, 13-feature anomaly detector, TTA, threshold sweep |
-| **v3 (API)** | Cross-signal reasoning module; layered decision engine |
-| **v4 (API)** | Semantic logical validation: `extract_structured_fields`, `validate_totals`, `validate_critical_fields`, logical anomaly score; result caching between modules |
-| **v4.1 (API)** | `_join_split_lines` for thermal printer split lines; `_infer_total_from_items` fallback; multi-PSM OCR retry (PSM 6→11→4→3); `ocr_error` surfaced instead of swallowed; `/scan-debug` endpoint; `_KW_PAYMENT` bucket to stop "cash paid" lines from contaminating item sums |
 
----
-
-## What the Numbers Mean for a Reviewer
-
-The classifier alone (AUC 0.67, accuracy 53%) is not usable in production. It performs barely above random on this dataset, which reflects how hard the problem is — the forgery generator creates realistic edits, and the receipt images vary widely in quality, format, and language.
-
-The ensemble (AUC 0.81, accuracy 76%) is significantly better, but the most important addition is the **semantic reasoning layer** in v4/v4.1 that operates entirely outside the trained models. When a receipt shows items summing to ₹2,000 but a total of ₹5,800, no amount of visual training data will catch that — it requires reading the text, parsing the structure, and doing arithmetic. That layer has no AUC metric because it fires in a deterministic, rule-based way on real receipts, but it closes the gap that the trained models leave open.
-
----
-
-## Resume / LinkedIn
-
-**Technical framing:**
-> Built a multi-signal receipt forgery detection pipeline combining EfficientNet-B3 image classification (AUC 0.67 standalone → 0.81 ensemble), U-Net pixel-level tamper segmentation localising edits to <7% of image area, and a custom OCR semantic reasoning engine that validates arithmetic consistency of financial fields — achieving a 23-point accuracy improvement over the classifier alone and serving explainable verdicts via FastAPI.
-
-**Impact framing:**
-> Designed an end-to-end AI fraud detection system for receipt tampering that integrates computer vision, OCR-based logical validation, and physical artifact detection into a layered decision engine — the semantic layer catches visually clean digital edits by detecting when stated totals don't match line-item sums, addressing the core failure mode of image-only classifiers.
-
-**Concise (CV bullet / LinkedIn headline):**
-> Receipt forgery detection: EfficientNet-B3 + U-Net segmentation + OCR arithmetic validation → ensemble AUC 0.81 (+14pp over classifier alone), FastAPI backend, explainable flag-level output.
