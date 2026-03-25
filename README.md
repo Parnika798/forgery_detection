@@ -1,6 +1,6 @@
 # Receipt Forgery Detection System
 
-A production-grade, multi-signal AI pipeline that detects tampered receipts by combining a CNN image classifier, a pixel-level segmentation model, rule-based physical artifact detection, and a semantic OCR reasoning engine — all served through a FastAPI backend.
+A multi-signal AI pipeline that detects tampered receipts by combining a CNN image classifier, a pixel-level segmentation model, rule-based physical artifact detection, and a semantic OCR reasoning engine — all served through a FastAPI backend.
 
 ---
 
