@@ -4,7 +4,7 @@ A multi-signal AI system for detecting tampered receipts using **image classific
 
 ---
 
-## 🚀 Highlights
+## Highlights
 
 - Detects **subtle forgeries (<5% pixel tampering)**
 - Combines **visual + spatial + semantic signals**
@@ -13,7 +13,7 @@ A multi-signal AI system for detecting tampered receipts using **image classific
 
 ---
 
-## 📊 Results
+##  Results
 
 - Dataset: 1,903 receipts (973 real, 930 forged)
 
@@ -29,7 +29,7 @@ Single-model approaches struggle on localized tampering. Combining **classificat
 
 ---
 
-## ❗ Problem
+##  Problem Statement
 
 Receipt fraud often involves:
 - Small edits (1–2 digits changed)
@@ -40,7 +40,7 @@ Pure CNN-based approaches fail because most of the image remains authentic.
 
 ---
 
-## 🧠 Approach
+##  Approach
 
 The system combines multiple complementary signals:
 
@@ -61,7 +61,7 @@ These signals are fused using a **rule-based + ensemble decision engine**.
 
 ---
 
-## 📦 Dataset
+##  Dataset
 
 - Source: **SROIE 2019 (Kaggle)**
 - 973 real receipts with OCR annotations  
@@ -75,7 +75,7 @@ These signals are fused using a **rule-based + ensemble decision engine**.
 
 ---
 
-## ⚙️ Training
+##  Training
 
 - Trained on **Google Colab (T4 GPU)**  
 - Notebooks:
@@ -90,7 +90,7 @@ These signals are fused using a **rule-based + ensemble decision engine**.
 
 ---
 
-## ⚡ Inference Pipeline
+## Inference Pipeline
 
 - Runs **multi-signal detection**:
   - Visual (classifier)
@@ -111,7 +111,7 @@ These signals are fused using a **rule-based + ensemble decision engine**.
 
 ---
 
-## 💡 Key Insight
+## Key Insight
 
 Forgery detection is not purely a vision problem.
 
@@ -124,7 +124,7 @@ leads to significantly better performance than any single model.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - PyTorch, EfficientNet, U-Net  
 - OpenCV (image forensics)  
@@ -134,7 +134,7 @@ leads to significantly better performance than any single model.
 
 ---
 
-## 📌 Future Improvements
+## Future Improvements
 
 - Improve OCR robustness for multi-currency receipts  
 - Train on real-world forged data (not synthetic)  
