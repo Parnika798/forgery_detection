@@ -60,6 +60,8 @@ These signals are fused using a **rule-based + ensemble decision engine**.
 ---
 
 ##  System Flow
+<img width="1024" height="768" alt="Francois Mercer" src="https://github.com/user-attachments/assets/fda7b647-0c63-47c9-9960-186afd49abfa" />
+
 
 
 
